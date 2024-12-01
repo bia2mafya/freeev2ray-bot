@@ -34,8 +34,8 @@ jobs:
       
       - name: Commit changes and push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # استفاده از Token در محیط متغیرها
+          FARSHID_TOKEN: ${{ secrets.FARSHID_TOKEN }}  # استفاده از Token در محیط متغیرها
         run: |
           git add previous_links.txt
           git commit -m "Update previous links"
-          git push https://github.com/bia2mafya/freeev2ray-bot.git HEAD:main  # ارسال به مخزن با استفاده از GITHUB_TOKEN
+          git push https://github.com/bia2mafya/freeev2ray-bot.git HEAD:main  # ارسال به مخزن با استفاده از FARSHID_TOKEN
