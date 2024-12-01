@@ -1,0 +1,29 @@
+name: Run Telegram Bot
+
+on:
+  schedule:
+    # اجرای هر 30 دقیقه یکبار
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-php-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'  # یا نسخه PHP مورد نظر شما
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+
+      - name: Run bot.php
+        run: |
+          php bot.php
