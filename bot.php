@@ -1,8 +1,7 @@
-
 <?php
 // توکن ربات تلگرام و شناسه کانال به طور مستقیم در اینجا وارد می‌شود
 $telegramBotToken = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
-$chatId = '@freeev2ray';
+$chatId = '@testfreevpn';
 
 // آدرس URL که حاوی لیست لینک‌ها است
 $url = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/actives.txt';
@@ -30,6 +29,33 @@ if ($content === false) {
 // تقسیم محتوای فایل به خط‌ها
 $lines = explode("\n", $content);
 
+// ذخیره کل لینک‌ها که ارسال خواهند شد
+$finalMessage = "";
+
+// پردازش هر خط
+foreach ($lines as $line) {
+    // حذف بخش بعد از # ولی علامت # باقی می‌ماند
+    if (strpos($line, '#') !== false) {
+        $line = substr($line, 0, strpos($line, '#')); // جدا کردن تا علامت #
+    }
+    $line = trim($line);  // حذف فاصله‌ها
+
+    // بررسی اینکه آیا لینک خالی نیست و قبلاً ارسال نشده
+    if (!empty($line) && !in_array($line, $previousLinks)) {
+        // اضافه کردن متن جدید بعد از #
+        $finalMessage .= $line . ' 👉🆔 @Freeev2ray📡' . "\n";
+
+        // ذخیره لینک ارسال‌شده در فایل برای جلوگیری از ارسال مجدد
+        file_put_contents($previousLinksFile, $line . PHP_EOL, FILE_APPEND);
+    }
+}
+
+// اگر پیامی آماده شده است، آن را به تلگرام ارسال کن
+if (!empty($finalMessage)) {
+    // ارسال پیام به تلگرام با فرمت mono (متن داخل backticks)
+    sendToTelegram("`" . $finalMessage . "`");
+}
+
 // تابع ارسال پیام به تلگرام
 function sendToTelegram($message) {
     global $telegramBotToken, $chatId;
@@ -37,7 +63,8 @@ function sendToTelegram($message) {
     $url = "https://api.telegram.org/bot$telegramBotToken/sendMessage";
     $data = [
         'chat_id' => $chatId,
-        'text' => $message
+        'text' => $message,
+        'parse_mode' => 'MarkdownV2'  // تنظیم حالت فرمت برای ارسال متن به صورت mono
     ];
 
     // استفاده از cURL برای ارسال درخواست به API تلگرام
@@ -47,8 +74,6 @@ function sendToTelegram($message) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 30);  // تنظیم زمان تایم‌اوت برای درخواست
-    curl_setopt($ch, CURLOPT_VERBOSE, true); // فعال‌سازی cURL برای دیباگ
-    curl_setopt($ch, CURLOPT_STDERR, fopen('php://stderr', 'w'));  // برای بررسی خطاها
 
     $response = curl_exec($ch);
 
@@ -62,24 +87,4 @@ function sendToTelegram($message) {
 
     curl_close($ch);
 }
-
-// پردازش هر خط
-foreach ($lines as $line) {
-    // حذف بخش بعد از # و اضافه کردن متن جدید
-    $line_parts = explode('#', $line);
-    $line_base = $line_parts[0]; // قسمت قبل از #
-    
-    // بررسی اینکه آیا لینک خالی نیست و قبلاً ارسال نشده
-    if (!empty($line_base) && !in_array($line_base, $previousLinks)) {
-        // اضافه کردن متن جدید بعد از #
-        $message = $line_base . ' 👉🆔 @Freeev2ray📡';
-
-        // ارسال پیام به تلگرام
-        sendToTelegram($message);
-
-        // ذخیره لینک ارسال‌شده در فایل برای جلوگیری از ارسال مجدد
-        file_put_contents($previousLinksFile, $line_base . PHP_EOL, FILE_APPEND);
-    }
-}
 ?>
-
