@@ -1,8 +1,9 @@
 
+
 <?php
 // توکن ربات تلگرام و شناسه کانال به طور مستقیم در اینجا وارد می‌شود
 $telegramBotToken = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
-$chatId = '@testfreevpn';
+$chatId = ''@testfreevpn';
 
 // آدرس URL که حاوی لیست لینک‌ها است
 $url = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/actives.txt';
@@ -36,16 +37,16 @@ $sentLinks = 0; // شمارش لینک‌های ارسال شده
 
 // پردازش هر خط
 foreach ($lines as $line) {
-    // حذف بخش بعد از # ولی علامت # باقی می‌ماند
+    // بررسی وجود علامت # و نگه داشتن آن و حذف متن بعد از #
     if (strpos($line, '#') !== false) {
-        $line = substr($line, 0, strpos($line, '#')); // جدا کردن تا علامت #
+        $line = substr($line, 0, strpos($line, '#')) . '#👉🆔 @Freeev2ray📡'; // اضافه کردن متن جدید بعد از #
     }
     $line = trim($line);  // حذف فاصله‌ها
 
     // بررسی اینکه آیا لینک خالی نیست و قبلاً ارسال نشده
     if (!empty($line) && !in_array($line, $previousLinks)) {
-        // اضافه کردن متن جدید بعد از #
-        $finalMessage .= $line . ' 👉🆔 @Freeev2ray📡' . "\n";
+        // اضافه کردن لینک جدید به پیام
+        $finalMessage .= $line . "\n";
 
         // ذخیره لینک ارسال‌شده در فایل برای جلوگیری از ارسال مجدد
         file_put_contents($previousLinksFile, $line . PHP_EOL, FILE_APPEND);
