@@ -3,7 +3,7 @@
 <?php
 // توکن ربات تلگرام و شناسه کانال به طور مستقیم در اینجا وارد می‌شود
 $telegramBotToken = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
-$chatId = ''@testfreevpn';
+$chatId = '@testfreevpn';
 
 // آدرس URL که حاوی لیست لینک‌ها است
 $url = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/actives.txt';
