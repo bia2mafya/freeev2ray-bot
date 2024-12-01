@@ -1,3 +1,4 @@
+
 <?php
 // توکن ربات تلگرام و شناسه کانال به طور مستقیم در اینجا وارد می‌شود
 $telegramBotToken = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
@@ -52,6 +53,9 @@ foreach ($lines as $line) {
 
 // اگر پیامی آماده شده است، آن را به تلگرام ارسال کن
 if (!empty($finalMessage)) {
+    // Escape کردن کاراکترهای خاص برای استفاده در MarkdownV2
+    $finalMessage = escapeMarkdownV2($finalMessage);
+
     // ارسال پیام به تلگرام با فرمت mono (متن داخل backticks)
     sendToTelegram("`" . $finalMessage . "`");
 }
@@ -87,4 +91,12 @@ function sendToTelegram($message) {
 
     curl_close($ch);
 }
+
+// تابع برای escape کردن کاراکترهای خاص در MarkdownV2
+function escapeMarkdownV2($text) {
+    $search = ['\\', '*', '_', '{', '}', '[', ']', '(', ')', '#', '+', '-', '.', '!', '~'];
+    $replace = ['\\\\', '\\*', '\\_', '\\{', '\\}', '\\[', '\\]', '\\(', '\\)', '\\#', '\\+', '\\-', '\\.', '\\!', '\\~'];
+    return str_replace($search, $replace, $text);
+}
 ?>
+
