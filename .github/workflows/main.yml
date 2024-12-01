@@ -1,29 +1,40 @@
-name: Run Telegram Bot
+name: Run PHP Script and Commit Changes
 
 on:
   schedule:
-    # اجرای هر 30 دقیقه یکبار
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+    - cron: '0 0 * * *' # اجرای هر روز ساعت 12:00 بامداد به وقت UTC
+  workflow_dispatch: # امکان اجرای دستی از GitHub
 
 jobs:
   run-php-script:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # سیستم عامل مورد استفاده
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2  # دریافت کد از مخزن
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'  # یا نسخه PHP مورد نظر شما
+          php-version: '7.4'  # نسخه PHP مورد نظر
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y curl
 
-      - name: Run bot.php
+      - name: Run PHP script
         run: |
-          php bot.php
+          php bot.php  # اجرای اسکریپت PHP
+
+      - name: Commit changes and push
+        run: |
+          git config --global user.email "your-email@example.com"
+          git config --global user.name "YourGitHubUsername"
+          
+          # بررسی وجود فایل previous_links.txt و commit تغییرات آن
+          if [ -f previous_links.txt ]; then
+            git add previous_links.txt
+            git commit -m "Update previous links"
+            git push origin main  # ارسال به مخزن GitHub
+          fi
