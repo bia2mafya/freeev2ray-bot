@@ -30,8 +30,9 @@ if ($content === false) {
 // تقسیم محتوای فایل به خط‌ها
 $lines = explode("\n", $content);
 
-// ذخیره کل لینک‌ها که ارسال خواهند شد
+// ذخیره لینک‌های که ارسال خواهند شد
 $finalMessage = "";
+$sentLinks = 0; // شمارش لینک‌های ارسال شده
 
 // پردازش هر خط
 foreach ($lines as $line) {
@@ -48,6 +49,14 @@ foreach ($lines as $line) {
 
         // ذخیره لینک ارسال‌شده در فایل برای جلوگیری از ارسال مجدد
         file_put_contents($previousLinksFile, $line . PHP_EOL, FILE_APPEND);
+
+        // افزایش شمارنده لینک‌های ارسال شده
+        $sentLinks++;
+
+        // اگر 10 لینک ارسال شد، از ارسال بیشتر جلوگیری می‌کنیم
+        if ($sentLinks >= 10) {
+            break;
+        }
     }
 }
 
