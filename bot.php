@@ -1,3 +1,4 @@
+
 <?php
 // توکن ربات تلگرام و شناسه کانال به طور مستقیم در اینجا وارد می‌شود
 $telegramBotToken = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
@@ -65,19 +66,19 @@ function sendToTelegram($message) {
 // پردازش هر خط
 foreach ($lines as $line) {
     // حذف بخش بعد از # و اضافه کردن متن جدید
-    $line = explode('#', $line)[0]; // جدا کردن تا علامت # 
-    $line = trim($line);  // حذف فاصله‌ها
-
+    $line_parts = explode('#', $line);
+    $line_base = $line_parts[0]; // قسمت قبل از #
+    
     // بررسی اینکه آیا لینک خالی نیست و قبلاً ارسال نشده
-    if (!empty($line) && !in_array($line, $previousLinks)) {
-        // اضافه کردن متن جدید بعد از # 
-        $message = $line . ' 👉🆔 @Freeev2ray📡';
+    if (!empty($line_base) && !in_array($line_base, $previousLinks)) {
+        // اضافه کردن متن جدید بعد از #
+        $message = $line_base . ' 👉🆔 @Freeev2ray📡';
 
         // ارسال پیام به تلگرام
         sendToTelegram($message);
 
         // ذخیره لینک ارسال‌شده در فایل برای جلوگیری از ارسال مجدد
-        file_put_contents($previousLinksFile, $line . PHP_EOL, FILE_APPEND);
+        file_put_contents($previousLinksFile, $line_base . PHP_EOL, FILE_APPEND);
     }
 }
 ?>
