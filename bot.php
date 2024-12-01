@@ -99,4 +99,3 @@ function escapeMarkdownV2($text) {
     return str_replace($search, $replace, $text);
 }
 ?>
-
