@@ -27,14 +27,15 @@ jobs:
         run: |
           php bot.php  # اجرای اسکریپت PHP
 
-      - name: Commit changes and push
+      - name: Configure Git
         run: |
           git config --global user.email "your-email@example.com"
           git config --global user.name "YourGitHubUsername"
-          
-          # بررسی وجود فایل previous_links.txt و commit تغییرات آن
-          if [ -f previous_links.txt ]; then
-            git add previous_links.txt
-            git commit -m "Update previous links"
-            git push origin main  # ارسال به مخزن GitHub
-          fi
+      
+      - name: Commit changes and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # استفاده از Token در محیط متغیرها
+        run: |
+          git add previous_links.txt
+          git commit -m "Update previous links"
+          git push https://github.com/bia2mafya/freeev2ray-bot.git HEAD:main  # ارسال به مخزن با استفاده از GITHUB_TOKEN
