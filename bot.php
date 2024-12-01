@@ -1,111 +1,54 @@
-
-
-<?php
-// توکن ربات تلگرام و شناسه کانال به طور مستقیم در اینجا وارد می‌شود
-$telegramBotToken = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
-$chatId = '@testfreevpn';
-
-// آدرس URL که حاوی لیست لینک‌ها است
-$url = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/actives.txt';
-
-// مسیر فایل ذخیره لینک‌های قبلی
+$apiToken = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
+$channelUsername = '@testfreevpn';
+$dataUrl = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/actives.txt';
 $previousLinksFile = 'previous_links.txt';
 
-// اگر فایل لینک‌های قبلی وجود ندارد، ایجاد شود
-if (!file_exists($previousLinksFile)) {
-    file_put_contents($previousLinksFile, '');
+// دانلود داده‌ها از URL
+$data = file_get_contents($dataUrl);
+if ($data === false) {
+    die("Failed to fetch data from URL.\n");
+}
+
+// پردازش لینک‌ها و اصلاح آن‌ها
+$lines = explode("\n", $data);
+$processedLinks = [];
+foreach ($lines as $line) {
+    if (trim($line) === '') {
+        continue;
+    }
+    $linkParts = explode('#', $line, 2);
+    if (count($linkParts) > 1) {
+        $processedLinks[] = $linkParts[0] . '#👉🆔 @Freeev2ray📡';
+    }
 }
 
 // خواندن لینک‌های قبلی از فایل
-$previousLinks = file($previousLinksFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-// دریافت محتوای فایل از URL
-$content = file_get_contents($url);
-
-// بررسی اینکه آیا محتوای فایل به درستی خوانده شده است
-if ($content === false) {
-    echo "Error reading the content from the URL!";
-    exit();
+$previousLinks = [];
+if (file_exists($previousLinksFile)) {
+    $previousLinks = file($previousLinksFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 }
 
-// تقسیم محتوای فایل به خط‌ها
-$lines = explode("\n", $content);
-
-// ذخیره لینک‌های که ارسال خواهند شد
-$finalMessage = "";
-$sentLinks = 0; // شمارش لینک‌های ارسال شده
-
-// پردازش هر خط
-foreach ($lines as $line) {
-    // بررسی وجود علامت # و نگه داشتن آن و حذف متن بعد از #
-    if (strpos($line, '#') !== false) {
-        $line = substr($line, 0, strpos($line, '#')) . '#👉🆔 @Freeev2ray📡'; // اضافه کردن متن جدید بعد از #
-    }
-    $line = trim($line);  // حذف فاصله‌ها
-
-    // بررسی اینکه آیا لینک خالی نیست و قبلاً ارسال نشده
-    if (!empty($line) && !in_array($line, $previousLinks)) {
-        // اضافه کردن لینک جدید به پیام
-        $finalMessage .= $line . "\n";
-
-        // ذخیره لینک ارسال‌شده در فایل برای جلوگیری از ارسال مجدد
-        file_put_contents($previousLinksFile, $line . PHP_EOL, FILE_APPEND);
-
-        // افزایش شمارنده لینک‌های ارسال شده
-        $sentLinks++;
-
-        // اگر 10 لینک ارسال شد، از ارسال بیشتر جلوگیری می‌کنیم
-        if ($sentLinks >= 10) {
-            break;
-        }
-    }
+// پیدا کردن لینک‌های جدید
+$newLinks = array_diff($processedLinks, $previousLinks);
+if (empty($newLinks)) {
+    echo "No new links to send.\n";
+    exit;
 }
 
-// اگر پیامی آماده شده است، آن را به تلگرام ارسال کن
-if (!empty($finalMessage)) {
-    // Escape کردن کاراکترهای خاص برای استفاده در MarkdownV2
-    $finalMessage = escapeMarkdownV2($finalMessage);
+// ارسال لینک‌های جدید به کانال
+$batchSize = 10; // تعداد لینک‌ها در هر پیام
+$batches = array_chunk($newLinks, $batchSize);
 
-    // ارسال پیام به تلگرام با فرمت mono (متن داخل backticks)
-    sendToTelegram("`" . $finalMessage . "`");
-}
-
-// تابع ارسال پیام به تلگرام
-function sendToTelegram($message) {
-    global $telegramBotToken, $chatId;
-    
-    $url = "https://api.telegram.org/bot$telegramBotToken/sendMessage";
-    $data = [
-        'chat_id' => $chatId,
+foreach ($batches as $batch) {
+    $message = "```\n" . implode("\n", $batch) . "\n```"; // ارسال در قالب Mono
+    $response = file_get_contents("https://api.telegram.org/bot$apiToken/sendMessage?" . http_build_query([
+        'chat_id' => $channelUsername,
         'text' => $message,
-        'parse_mode' => 'MarkdownV2'  // تنظیم حالت فرمت برای ارسال متن به صورت mono
-    ];
-
-    // استفاده از cURL برای ارسال درخواست به API تلگرام
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);  // تنظیم زمان تایم‌اوت برای درخواست
-
-    $response = curl_exec($ch);
-
-    // بررسی اینکه آیا خطایی در ارسال پیام وجود دارد یا نه
-    if(curl_errno($ch)) {
-        echo 'cURL error: ' . curl_error($ch);
-    } else {
-        echo 'Message sent successfully!';
-        var_dump($response); // چاپ پاسخ API برای بررسی
-    }
-
-    curl_close($ch);
+        'parse_mode' => 'MarkdownV2'
+    ]));
+    echo "Message sent: " . $response . "\n";
+    sleep(1); // کمی تأخیر برای جلوگیری از محدودیت API
 }
 
-// تابع برای escape کردن کاراکترهای خاص در MarkdownV2
-function escapeMarkdownV2($text) {
-    $search = ['\\', '*', '_', '{', '}', '[', ']', '(', ')', '#', '+', '-', '.', '!', '~'];
-    $replace = ['\\\\', '\\*', '\\_', '\\{', '\\}', '\\[', '\\]', '\\(', '\\)', '\\#', '\\+', '\\-', '\\.', '\\!', '\\~'];
-    return str_replace($search, $replace, $text);
-}
-?>
+// به‌روزرسانی فایل لینک‌های قبلی
+file_put_contents($previousLinksFile, implode("\n", array_merge($previousLinks, $newLinks)));
