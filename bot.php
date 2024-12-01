@@ -6,6 +6,17 @@ $chatId = '@freeev2ray';
 // آدرس URL که حاوی لیست لینک‌ها است
 $url = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/actives.txt';
 
+// مسیر فایل ذخیره لینک‌های قبلی
+$previousLinksFile = 'previous_links.txt';
+
+// اگر فایل لینک‌های قبلی وجود ندارد، ایجاد شود
+if (!file_exists($previousLinksFile)) {
+    file_put_contents($previousLinksFile, '');
+}
+
+// خواندن لینک‌های قبلی از فایل
+$previousLinks = file($previousLinksFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
 // دریافت محتوای فایل از URL
 $content = file_get_contents($url);
 
@@ -57,13 +68,17 @@ foreach ($lines as $line) {
     $line = explode('#', $line)[0]; // جدا کردن تا علامت # 
     $line = trim($line);  // حذف فاصله‌ها
 
-    // بررسی اینکه آیا لینک قبلاً ارسال شده است
-    if (!empty($line)) {
+    // بررسی اینکه آیا لینک خالی نیست و قبلاً ارسال نشده
+    if (!empty($line) && !in_array($line, $previousLinks)) {
         // اضافه کردن متن جدید بعد از # 
         $message = $line . ' 👉🆔 @Freeev2ray📡';
 
         // ارسال پیام به تلگرام
         sendToTelegram($message);
+
+        // ذخیره لینک ارسال‌شده در فایل برای جلوگیری از ارسال مجدد
+        file_put_contents($previousLinksFile, $line . PHP_EOL, FILE_APPEND);
     }
 }
 ?>
+
