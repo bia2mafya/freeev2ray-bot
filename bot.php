@@ -1,4 +1,3 @@
-
 <?php
 $bot_token = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
 $chat_id = '@testfreevpn';
@@ -14,15 +13,8 @@ $proxies = explode("\n", $proxies);
 function sendMessage($text) {
     global $bot_token, $chat_id;
 
-    // تقسیم پیام‌های طولانی
-    if (strlen($text) > 4096) {
-        $messages = str_split($text, 4096);  // تقسیم به قطعات کوچک‌تر
-        foreach ($messages as $message) {
-            file_get_contents("https://api.telegram.org/bot$bot_token/sendMessage?chat_id=$chat_id&text=" . urlencode($message) . "&parse_mode=Markdown");
-        }
-    } else {
-        file_get_contents("https://api.telegram.org/bot$bot_token/sendMessage?chat_id=$chat_id&text=" . urlencode($text) . "&parse_mode=Markdown");
-    }
+    // ارسال پیام به تلگرام
+    file_get_contents("https://api.telegram.org/bot$bot_token/sendMessage?chat_id=$chat_id&text=" . urlencode($text) . "&parse_mode=Markdown");
 }
 
 // حذف قسمت بعد از علامت "#"
@@ -44,6 +36,9 @@ foreach ($proxies as $proxy) {
     $updated_proxies[] = $proxy;
 }
 
+// قالب‌بندی لینک‌ها به صورت کد
+$formatted_links = "```\n" . implode("\n", array_slice($updated_proxies, 0, 10)) . "\n```";
+
 // ارسال لینک‌ها به کانال تلگرام
-sendMessage(implode("\n", array_slice($updated_proxies, 0, 10)));  // ارسال تنها 10 لینک به کانال
+sendMessage($formatted_links);  // ارسال تنها 10 لینک به کانال
 ?>
