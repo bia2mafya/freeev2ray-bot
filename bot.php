@@ -9,6 +9,10 @@ $proxy_url = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-tele
 $proxies = file_get_contents($proxy_url);
 $proxies = explode("\n", $proxies);
 
+// متن دلخواه قبل و بعد لینک‌ها
+$before_text = "🔥 این لینک‌های جدید پروکسی هستند:";
+$after_text = "📢 از این لینک‌ها استفاده کنید و کانال ما را دنبال کنید!";
+
 // تابع برای ارسال پیام به کانال تلگرام
 function sendMessage($text) {
     global $bot_token, $chat_id;
@@ -36,9 +40,10 @@ foreach ($proxies as $proxy) {
     $updated_proxies[] = $proxy;
 }
 
-// قالب‌بندی لینک‌ها به صورت کد
-$formatted_links = "```\n" . implode("\n", array_slice($updated_proxies, 0, 10)) . "\n```";
-
-// ارسال لینک‌ها به کانال تلگرام
-sendMessage($formatted_links);  // ارسال تنها 10 لینک به کانال
+// ارسال متن به تلگرام به همراه لینک‌ها
+sendMessage($before_text); // ارسال متن قبل از لینک‌ها
+foreach (array_slice($updated_proxies, 0, 10) as $proxy) {
+    sendMessage($proxy); // ارسال لینک‌ها جداگانه
+}
+sendMessage($after_text); // ارسال متن بعد از لینک‌ها
 ?>
