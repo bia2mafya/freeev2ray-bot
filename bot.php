@@ -1,6 +1,6 @@
 <?php
 $bot_token = '7586838595:AAHRFoImH2YFPkEeqEWpBngBDmuoEvSM9oY';
-$chat_id = '@testfreevpn';
+$chat_id = '@freeev2ray';
 
 // URL برای دریافت داده‌ها
 $proxy_url = 'https://raw.githubusercontent.com/MrMohebi/xray-proxy-grabber-telegram/refs/heads/master/collected-proxies/row-url/actives.txt';
